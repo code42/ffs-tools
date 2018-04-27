@@ -1,0 +1,34 @@
+{
+  "groups": [
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "fileName",
+          "value": "*.sh"
+        }
+      ],
+      "filterClause": "OR"
+    },
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "filePath",
+          "value": "/Users/*/Downloads*"
+        },
+        {
+          "operator": "IS",
+          "term": "eventType",
+          "value": "CREATED"
+        }
+      ],
+      "filterClause": "AND"
+    }
+  ],
+  "groupClause": "AND",
+  "pgNum": 1,
+  "pgSize": 100,
+  "srtDir": "desc",
+  "srtKey": "eventTimestamp"
+}

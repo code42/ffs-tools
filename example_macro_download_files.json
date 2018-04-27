@@ -1,0 +1,48 @@
+{
+  "groups": [
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "fileName",
+          "value": "*.docm"
+        },
+        {
+          "operator": "IS",
+          "term": "fileName",
+          "value": "*.xlsm"
+        }
+      ],
+      "filterClause": "OR"
+    },
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "filePath",
+          "value": "/Users/*/Downloads*"
+        },
+        {
+          "operator": "IS",
+          "term": "filePath",
+          "value": "C:\\Users\\*\\Downloads*"
+        }
+      ],
+      "filterClause": "OR"
+    },
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "eventType",
+          "value": "CREATED"
+        }
+      ]
+    }
+  ],
+  "groupClause": "AND",
+  "pgNum": 1,
+  "pgSize": 100,
+  "srtDir": "asc",
+  "srtKey": "eventTimestamp"
+}

@@ -1,0 +1,38 @@
+{
+  "groups": [
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "fileName",
+          "value": "*.exe"
+        }
+      ],
+      "filterClause": "OR"
+    },
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "filePath",
+          "value": "C:\\Users\\*\\AppData\\Local\\Temp*"
+        }
+      ],
+      "filterClause": "OR"
+    },
+    {
+      "filters": [
+        {
+          "operator": "IS",
+          "term": "eventType",
+          "value": "CREATED"
+        }
+      ]
+    }
+  ],
+  "groupClause": "AND",
+  "pgNum": 1,
+  "pgSize": 100,
+  "srtDir": "desc",
+  "srtKey": "eventTimestamp"
+}
