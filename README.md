@@ -11,7 +11,7 @@ FFS Search Tool requires Python 3 and the following packages (install via pip):
 
 ### Usage
 ```
-usage: ffs-search.py [-h] --username USERNAME [--password PASSWORD]
+usage: ffs_search.py [-h] --username USERNAME [--password PASSWORD]
                      [--sts_url STS_URL] [--base_url BASE_URL] --search_type
                      {md5,filename,filepath,hostname,raw}
                      [--values [value1 [value2 ...]]] [--count]
@@ -42,23 +42,23 @@ optional arguments:
                         for each event
 ```
 
-### Examples
+### CLI Examples
 
 #### Search for single Hostname
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type hostname --values C02RW2N1FVH0
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type hostname --values C02RW2N1FVH0
 ```
 
 #### Search for multiple MD5 hashes on the command line (up to 1024 values per search)
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b eb574631669f4c00a2d49c4e051ccaad
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b eb574631669f4c00a2d49c4e051ccaad
 ```
 
 #### Conduct a custom search using a JSON payload
-Note: see the [API Documenation](https://support.code42.com/Administrator/Cloud/Monitoring_and_managing/Forensic_File_Search_API) support page for complete information on search syntax.
+Note: see the [API Documentation](https://support.code42.com/Administrator/Cloud/Monitoring_and_managing/Forensic_File_Search_API) support page for complete information on search syntax.
 
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type raw --values '{
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type raw --values '{
   "groups": [
     {
       "filters": [
@@ -103,27 +103,38 @@ python3 ./ffs-search.py --username sampleuser@code42.com --search_type raw --val
 Conducts the same search as above assuming that example\_macro\_download\_files.json contains the above JSON
 
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type raw --in_file example_macro_download_files.json
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type raw --in_file example_macro_download_files.json
 ```
 
 #### Write search results to file
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b --out_file results.json
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b --out_file results.json
 ```
 
 #### Return count of results only
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b --count
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b --count
 ```
 
 #### Export only the MD5 hashes from a search
 ```
-python3 ./ffs-search.py --username sampleuser@code42.com --search_type raw --values example_macro_download_files.json --out_file results.json --out_filter md5
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type raw --values example_macro_download_files.json --out_file results.json --out_filter md5
+```
+
+### FFSQuery Class Examples
+
+You can also import the FFSQuery class into your own Python code:
+
+```
+from ffs_search import FFSQuery
+q = FFSQuery('authority-east-lb.us.code42.com')
+q.do_login('sts-east.us.code42.com','sampleuser@code42.com','************')
+q.build_query_payload('md5',['7bf2b57f2a205768755c07f238fb32cc'])
+results = q.do_search()
 ```
 
 ### Future Enhancements
 * Support searching on all event types
 * More complex queries without the need for raw search_type
-* Create search object for use in other tools/automation
 * Filter output results
 * Better error handling/messaging
