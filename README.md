@@ -1,7 +1,7 @@
 # FFS Search Tool
 
 ### Summary
-Searches for File Forensic Search events in Code42 FFS tool via API
+Searches for Forensic File Search events in Code42 FFS tool via API
 
 ### Requirements
 
@@ -13,12 +13,12 @@ FFS Search Tool requires Python 3 and the following packages (install via pip):
 ```
 usage: ffs_search.py [-h] --username USERNAME [--password PASSWORD]
                      [--sts_url STS_URL] [--base_url BASE_URL] --search_type
-                     {md5,filename,filepath,hostname,raw}
+                     {md5,sha256,filename,filepath,hostname,raw}
                      [--values [value1 [value2 ...]]] [--count]
                      [--in_file IN_FILE] [--out_file OUT_FILE]
-                     [--out_filter {md5}]
+                     [--out_filter {md5,sha256}]
 
-Code42 File Forensic Search
+Code42 Forensic File Search
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -27,7 +27,7 @@ optional arguments:
   --sts_url STS_URL     STS URL for retrieving authentication token, defaults
                         to sts-east
   --base_url BASE_URL   API URL for search, defaults to authority-east-lb
-  --search_type {md5,filename,filepath,hostname,raw}
+  --search_type {md5,sha256,filename,filepath,hostname,raw}
                         Type of attribute to search for. A raw search will
                         take a JSON string as a value and use that as the
                         query payload for complex queries
@@ -38,7 +38,8 @@ optional arguments:
   --in_file IN_FILE     Input file containing values (one per line) or raw
                         JSON query payload
   --out_file OUT_FILE   Output file for results
-  --out_filter {md5}    Selected attribute to export instead of all attributes
+  --out_filter {md5,sha256}
+                        Selected attribute to export instead of all attributes
                         for each event
 ```
 
@@ -116,9 +117,9 @@ python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --val
 python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b --count
 ```
 
-#### Export only the MD5 hashes from a search
+#### Export only the SHA256 hashes from a search
 ```
-python3 ./ffs_search.py --username sampleuser@code42.com --search_type raw --values example_macro_download_files.json --out_file results.json --out_filter md5
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type raw --values example_macro_download_files.json --out_file results.json --out_filter sha256
 ```
 
 ### FFSQuery Class Examples

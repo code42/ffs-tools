@@ -89,6 +89,7 @@ class FFSQuery:
         # Map out the supported search fields to FFS API field names
         mapper = {
             'md5': 'md5Checksum',
+            'sha256': 'sha256Checksum',
             'filename': 'fileName',
             'hostname': 'osHostName',
             'filepath': 'filePath'
@@ -176,7 +177,8 @@ def write_out_count(out_file, count):
 def filter_results(results, out_filter):
     newresults = []
     mapper = {
-        'md5': 'md5Checksum'
+        'md5': 'md5Checksum',
+        'sha256': 'sha256Checksum'
     }
     for event in results['fileEvents']:
         # Grab the attribute based on the mapping between out_filter options and the actual attribute name
@@ -191,12 +193,12 @@ def main():
     parser.add_argument('--password', help='Local user password')
     parser.add_argument('--sts_url', default='sts-east.us.code42.com', help='STS URL for retrieving authentication token, defaults to sts-east')
     parser.add_argument('--base_url', default='authority-east-lb.us.code42.com', help='API URL for search, defaults to authority-east-lb')
-    parser.add_argument('--search_type', choices = ['md5', 'filename', 'filepath', 'hostname', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
+    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'hostname', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))
     parser.add_argument('--count', help='Return count of results only', dest='count_only', action='store_true')
     parser.add_argument('--in_file', help='Input file containing values (one per line) or raw JSON query payload')
     parser.add_argument('--out_file', help='Output file for results')
-    parser.add_argument('--out_filter', choices = ['md5'], help='Selected attribute to export instead of all attributes for each event')
+    parser.add_argument('--out_filter', choices = ['md5','sha256'], help='Selected attribute to export instead of all attributes for each event')
 
     # Parse passed args
     args = parser.parse_args()
