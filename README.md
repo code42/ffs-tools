@@ -26,7 +26,7 @@ optional arguments:
   --password PASSWORD   Local user password
   --sts_url STS_URL     STS URL for retrieving authentication token, defaults
                         to sts-east
-  --base_url BASE_URL   API URL for search, defaults to authority-east-lb
+  --base_url BASE_URL   API URL for search, defaults to forensicsearch-east
   --search_type {md5,sha256,filename,filepath,hostname,raw}
                         Type of attribute to search for. A raw search will
                         take a JSON string as a value and use that as the
@@ -128,7 +128,7 @@ You can also import the FFSQuery class into your own Python code:
 
 ```
 from ffs_search import FFSQuery
-q = FFSQuery('authority-east-lb.us.code42.com')
+q = FFSQuery('forensicsearch-east.us.code42.com')
 q.do_login('sts-east.us.code42.com','sampleuser@code42.com','************')
 q.build_query_payload('md5',['7bf2b57f2a205768755c07f238fb32cc'])
 results = q.do_search()

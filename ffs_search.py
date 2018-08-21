@@ -192,7 +192,7 @@ def main():
     parser.add_argument('--username', help='Local user for with Security Event Viewer rights', required=True)
     parser.add_argument('--password', help='Local user password')
     parser.add_argument('--sts_url', default='sts-east.us.code42.com', help='STS URL for retrieving authentication token, defaults to sts-east')
-    parser.add_argument('--base_url', default='authority-east-lb.us.code42.com', help='API URL for search, defaults to authority-east-lb')
+    parser.add_argument('--base_url', default='forensicsearch-east.us.code42.com', help='API URL for search, defaults to forensicsearch-east')
     parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'hostname', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))
     parser.add_argument('--count', help='Return count of results only', dest='count_only', action='store_true')
