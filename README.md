@@ -13,7 +13,8 @@ FFS Search Tool requires Python 3 and the following packages (install via pip):
 ```
 usage: ffs_search.py [-h] --username USERNAME [--password PASSWORD]
                      [--sts_url STS_URL] [--base_url BASE_URL] --search_type
-                     {md5,sha256,filename,filepath,hostname,raw}
+                     {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,raw}
+                     [--source {google,onedrive,endpoint,all}]
                      [--values [value1 [value2 ...]]] [--count]
                      [--in_file IN_FILE] [--out_file OUT_FILE]
                      [--out_filter {md5,sha256}]
@@ -27,10 +28,12 @@ optional arguments:
   --sts_url STS_URL     STS URL for retrieving authentication token, defaults
                         to sts-east
   --base_url BASE_URL   API URL for search, defaults to forensicsearch-east
-  --search_type {md5,sha256,filename,filepath,hostname,raw}
+  --search_type {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,raw}
                         Type of attribute to search for. A raw search will
                         take a JSON string as a value and use that as the
                         query payload for complex queries
+  --source {google,onedrive,endpoint,all}
+                        Source of file events, defaults to All
   --values [value1 [value2 ...]]
                         One or more values of attribute search_type to search
                         for
@@ -53,6 +56,11 @@ python3 ./ffs_search.py --username sampleuser@code42.com --search_type hostname 
 #### Search for multiple MD5 hashes on the command line (up to 1024 values per search)
 ```
 python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --values d79d4f630f6e74d12305ce61268c125b eb574631669f4c00a2d49c4e051ccaad
+```
+
+#### Search for a SHA265 hash only on Google Drive
+```
+python3 ./ffs_search.py --username sampleuser@code42.com --source google  --search_type sha256 --values 8e5dd3be8f6e975951824e1ec4984b028f38934d8f9bba3df557b1cef57e8118
 ```
 
 #### Conduct a custom search using a JSON payload

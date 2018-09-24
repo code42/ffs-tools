@@ -78,7 +78,7 @@ class FFSQuery:
             self.logged_in = True
             return True
 
-    def build_query_payload(self, search_type, search_values):
+    def build_query_payload(self, search_type, search_values, source):
         """
         Build a query payload based on search type and values
 
@@ -92,7 +92,15 @@ class FFSQuery:
             'sha256': 'sha256Checksum',
             'filename': 'fileName',
             'hostname': 'osHostName',
-            'filepath': 'filePath'
+            'filepath': 'filePath',
+            'fileowner': 'fileOwner',
+            'actor': 'actor',
+            'sharedwith': 'sharedWith'
+        }
+        source_mapper = {
+            'google' : 'GoogleDrive',
+            'onedrive': 'OneDrive',
+            'endpoint': 'Endpoint'
         }
         # If a master group does not exist in the query yet, add it.
         if 'groups' not in self.query_payload:
@@ -100,7 +108,7 @@ class FFSQuery:
         ffs_filters = {}
         for search_value in search_values:
             ffs_filter = {}
-            ffs_filter['operator'] = "IS"
+            ffs_filter['operator'] = 'IS'
             ffs_filter['term'] = mapper[search_type]
             ffs_filter['value'] = search_value
             if 'filters' not in ffs_filters:
@@ -108,6 +116,17 @@ class FFSQuery:
             ffs_filters['filters'].append(ffs_filter)
         ffs_filters['filterClause'] = 'OR'
         self.query_payload['groups'].append(ffs_filters)
+        if source != 'all' and source is not None:
+            source_filters = {}
+            source_filter = {}
+            source_filter['operator'] = 'IS'
+            source_filter['term'] = 'source'
+            source_filter['value'] = source_mapper[source]
+            if 'filters' not in source_filters:
+                source_filters['filters'] = []
+            source_filters['filters'].append(source_filter)
+            self.query_payload['groups'].append(source_filters)
+            self.query_payload['groupClause'] = 'AND'
         self.query_payload['pgNum'] = 1
         self.query_payload['pgSize'] = 100
         return True
@@ -188,12 +207,13 @@ def filter_results(results, out_filter):
     
 def main():
     # Define args
-    parser = argparse.ArgumentParser(description='Code42 File Forensic Search')
+    parser = argparse.ArgumentParser(description='Code42 Forensic File Search')
     parser.add_argument('--username', help='Local user for with Security Event Viewer rights', required=True)
     parser.add_argument('--password', help='Local user password')
     parser.add_argument('--sts_url', default='sts-east.us.code42.com', help='STS URL for retrieving authentication token, defaults to sts-east')
     parser.add_argument('--base_url', default='forensicsearch-east.us.code42.com', help='API URL for search, defaults to forensicsearch-east')
-    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'hostname', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
+    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
+    parser.add_argument('--source', choices = ['google', 'onedrive', 'endpoint', 'all'], default='all', help='Source of file events, defaults to All')
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))
     parser.add_argument('--count', help='Return count of results only', dest='count_only', action='store_true')
     parser.add_argument('--in_file', help='Input file containing values (one per line) or raw JSON query payload')
@@ -247,7 +267,7 @@ def main():
             print('Error parsing JSON input, message: \'{}\'. Quitting...'.format(str(e)))
             sys.exit()
     else:
-        ffs_query.build_query_payload(args.search_type, query_values)
+        ffs_query.build_query_payload(args.search_type, query_values, args.source)
     # Do the search
     results = ffs_query.do_search()
     if results is None:
