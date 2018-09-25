@@ -1,4 +1,4 @@
-import sys, requests, getpass, json, argparse
+import sys, requests, getpass, json, argparse, re
 
 class FFSQuery:
     """
@@ -19,8 +19,6 @@ class FFSQuery:
         self.s = requests.Session()
         # Auth token used for querying
         self.auth_token = None
-        # Query payload
-        self.query_payload = {}
         # Flag if we are logged in
         self.logged_in = False
         # Set base URL for queries
@@ -78,13 +76,17 @@ class FFSQuery:
             self.logged_in = True
             return True
 
-    def build_query_payload(self, search_type, search_values, source):
+    def build_query_payload(self, search_type, search_values, source, max_results, events_before=None, events_after=None):
         """
         Build a query payload based on search type and values
 
         :param search_type: Type of search you want to conduct, will be mapped to FFS API field types
         :param search_values: list of values to search for
-        :returns: Returns True if the query build was successful
+        :param source: source of data (Endpoint, Google Drive, OneDrive, All)
+        :param max_results: Max number of results to return, limited to 10000 or less
+        :param events_before: Optional date in YYYY-MM-DD format for returning events on or before that date
+        :param events_after: Optional date in YYYY-MM-DD format for returning events on or after that date
+        :returns: Returns the query payload if the query build was successful
         """
         # Map out the supported search fields to FFS API field names
         mapper = {
@@ -102,6 +104,8 @@ class FFSQuery:
             'onedrive': 'OneDrive',
             'endpoint': 'Endpoint'
         }
+        # Start with blank query
+        self.query_payload = {}
         # If a master group does not exist in the query yet, add it.
         if 'groups' not in self.query_payload:
             self.query_payload['groups'] = []
@@ -127,9 +131,31 @@ class FFSQuery:
             source_filters['filters'].append(source_filter)
             self.query_payload['groups'].append(source_filters)
             self.query_payload['groupClause'] = 'AND'
+        if events_before:
+            before_filters = {}
+            before_filter = {}
+            before_filter['operator'] = 'ON_OR_BEFORE'
+            before_filter['term'] = 'eventTimestamp'
+            before_filter['value'] = events_before
+            if 'filters' not in before_filters:
+                before_filters['filters'] = []
+            before_filters['filters'].append(before_filter)
+            self.query_payload['groups'].append(before_filters)
+            self.query_payload['groupClause'] = 'AND'
+        if events_after:
+            after_filters = {}
+            after_filter = {}
+            after_filter['operator'] = 'ON_OR_AFTER'
+            after_filter['term'] = 'eventTimestamp'
+            after_filter['value'] = events_after
+            if 'filters' not in after_filters:
+                after_filters['filters'] = []
+            after_filters['filters'].append(after_filter)
+            self.query_payload['groups'].append(after_filters)
+            self.query_payload['groupClause'] = 'AND'
         self.query_payload['pgNum'] = 1
-        self.query_payload['pgSize'] = 100
-        return True
+        self.query_payload['pgSize'] = max_results
+        return self.query_payload
 
     def load_query_payload_from_json(self, json_payload):
         """
@@ -215,6 +241,9 @@ def main():
     parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
     parser.add_argument('--source', choices = ['google', 'onedrive', 'endpoint', 'all'], default='all', help='Source of file events, defaults to All')
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))
+    parser.add_argument('--max_results', help='Max results to return, must be 10000 or less, default is 100', default=100, type=int)
+    parser.add_argument('--events_before', help='Retrieve events on or before specific date in YYYY-MM-DD format', default=None)
+    parser.add_argument('--events_after', help='Retrieve events on or after specific date in YYYY-MM-DD format', default=None)
     parser.add_argument('--count', help='Return count of results only', dest='count_only', action='store_true')
     parser.add_argument('--in_file', help='Input file containing values (one per line) or raw JSON query payload')
     parser.add_argument('--out_file', help='Output file for results')
@@ -232,7 +261,18 @@ def main():
     if args.count_only and args.out_filter:
         print('Error: --count and --out_filter are mutually exclusive options. Quitting...')
         sys.exit()
-
+    if args.max_results > 10000:
+        print('Error: --max_results cannot be greater than 10000. Quitting...')
+        sys.exit()
+    date_pattern = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
+    if args.events_before:
+        if not date_pattern.match(args.events_before):
+            print('Error: --events_before not in YYYY-MM-DD format. Quitting...')
+            sys.exit()
+    if args.events_after:
+        if not date_pattern.match(args.events_after):
+            print('Error: --events_after not in YYYY-MM-DD format. Quitting...')
+            sys.exit()
     
     # Parse in_file if passed, otherwise read Values
     if args.in_file:
@@ -267,7 +307,7 @@ def main():
             print('Error parsing JSON input, message: \'{}\'. Quitting...'.format(str(e)))
             sys.exit()
     else:
-        ffs_query.build_query_payload(args.search_type, query_values, args.source)
+        ffs_query.build_query_payload(args.search_type, query_values, args.source, args.max_results, args.events_before, args.events_after)
     # Do the search
     results = ffs_query.do_search()
     if results is None:

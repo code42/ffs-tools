@@ -15,7 +15,10 @@ usage: ffs_search.py [-h] --username USERNAME [--password PASSWORD]
                      [--sts_url STS_URL] [--base_url BASE_URL] --search_type
                      {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,raw}
                      [--source {google,onedrive,endpoint,all}]
-                     [--values [value1 [value2 ...]]] [--count]
+                     [--values [value1 [value2 ...]]]
+                     [--max_results MAX_RESULTS]
+                     [--events_before EVENTS_BEFORE]
+                     [--events_after EVENTS_AFTER] [--count]
                      [--in_file IN_FILE] [--out_file OUT_FILE]
                      [--out_filter {md5,sha256}]
 
@@ -37,6 +40,15 @@ optional arguments:
   --values [value1 [value2 ...]]
                         One or more values of attribute search_type to search
                         for
+  --max_results MAX_RESULTS
+                        Max results to return, must be 10000 or less, default
+                        is 100
+  --events_before EVENTS_BEFORE
+                        Retrieve events on or before specific date in YYYY-MM-
+                        DD format
+  --events_after EVENTS_AFTER
+                        Retrieve events on or after specific date in YYYY-MM-
+                        DD format
   --count               Return count of results only
   --in_file IN_FILE     Input file containing values (one per line) or raw
                         JSON query payload
@@ -138,7 +150,7 @@ You can also import the FFSQuery class into your own Python code:
 from ffs_search import FFSQuery
 q = FFSQuery('forensicsearch-east.us.code42.com')
 q.do_login('sts-east.us.code42.com','sampleuser@code42.com','************')
-q.build_query_payload('md5',['7bf2b57f2a205768755c07f238fb32cc'])
+q.build_query_payload('md5',['7bf2b57f2a205768755c07f238fb32cc'], 'all', 100)
 results = q.do_search()
 ```
 
