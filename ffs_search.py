@@ -97,7 +97,8 @@ class FFSQuery:
             'filepath': 'filePath',
             'fileowner': 'fileOwner',
             'actor': 'actor',
-            'sharedwith': 'sharedWith'
+            'sharedwith': 'sharedWith',
+            'event_id': 'eventId'
         }
         source_mapper = {
             'google' : 'GoogleDrive',
@@ -238,7 +239,7 @@ def main():
     parser.add_argument('--password', help='Local user password')
     parser.add_argument('--sts_url', default='sts-east.us.code42.com', help='STS URL for retrieving authentication token, defaults to sts-east')
     parser.add_argument('--base_url', default='forensicsearch-east.us.code42.com', help='API URL for search, defaults to forensicsearch-east')
-    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
+    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'event_id', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
     parser.add_argument('--source', choices = ['google', 'onedrive', 'endpoint', 'all'], default='all', help='Source of file events, defaults to All')
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))
     parser.add_argument('--max_results', help='Max results to return, must be 10000 or less, default is 100', default=100, type=int)

@@ -13,7 +13,7 @@ FFS Search Tool requires Python 3 and the following packages (install via pip):
 ```
 usage: ffs_search.py [-h] --username USERNAME [--password PASSWORD]
                      [--sts_url STS_URL] [--base_url BASE_URL] --search_type
-                     {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,raw}
+                     {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,raw}
                      [--source {google,onedrive,endpoint,all}]
                      [--values [value1 [value2 ...]]]
                      [--max_results MAX_RESULTS]
@@ -31,7 +31,7 @@ optional arguments:
   --sts_url STS_URL     STS URL for retrieving authentication token, defaults
                         to sts-east
   --base_url BASE_URL   API URL for search, defaults to forensicsearch-east
-  --search_type {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,raw}
+  --search_type {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,raw}
                         Type of attribute to search for. A raw search will
                         take a JSON string as a value and use that as the
                         query payload for complex queries
