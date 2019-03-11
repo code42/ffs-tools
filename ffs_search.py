@@ -90,20 +90,32 @@ class FFSQuery:
         """
         # Map out the supported search fields to FFS API field names
         mapper = {
-            'md5': 'md5Checksum',
-            'sha256': 'sha256Checksum',
-            'filename': 'fileName',
-            'hostname': 'osHostName',
-            'filepath': 'filePath',
-            'fileowner': 'fileOwner',
-            'actor': 'actor',
-            'sharedwith': 'sharedWith',
-            'event_id': 'eventId'
+            'md5' : 'md5Checksum',
+            'sha256' : 'sha256Checksum',
+            'filename' : 'fileName',
+            'hostname' : 'osHostName',
+            'filepath' : 'filePath',
+            'fileowner' : 'fileOwner',
+            'actor' : 'actor',
+            'sharedwith' : 'sharedWith',
+            'event_id' : 'eventId',
+            'exposure' : 'exposure',
+            'device_vendor' : 'removableMediaVendor',
+            'device_name' : 'removableMediaName',
+            'device_sn' : 'removableMediaSerialNumber',
+            'process_owner' : 'processOwner',
+            'process_name' : 'processName',
+            'sync_destination' : 'syncDestination'
         }
         source_mapper = {
             'google' : 'GoogleDrive',
             'onedrive': 'OneDrive',
             'endpoint': 'Endpoint'
+        }
+        exposure_mapper = {
+            'removable_media' : 'RemovableMedia',
+            'application_read' : 'ApplicationRead',
+            'cloud_storage' : 'CloudStorage'
         }
         # Start with blank query
         self.query_payload = {}
@@ -115,7 +127,14 @@ class FFSQuery:
             ffs_filter = {}
             ffs_filter['operator'] = 'IS'
             ffs_filter['term'] = mapper[search_type]
-            ffs_filter['value'] = search_value
+            # Map exposure types
+            if search_type == 'exposure':
+                try:
+                    ffs_filter['value'] = exposure_mapper[search_value]
+                except:
+                    raise KeyError('An invalid exposure type was selected. Permitted values are {}'.format(exposure_mapper.keys()))
+            else:
+                ffs_filter['value'] = search_value
             if 'filters' not in ffs_filters:
                 ffs_filters['filters'] = []
             ffs_filters['filters'].append(ffs_filter)
@@ -234,12 +253,12 @@ def filter_results(results, out_filter):
     
 def main():
     # Define args
-    parser = argparse.ArgumentParser(description='Code42 Forensic File Search')
+    parser = argparse.ArgumentParser(description='Code42 Forensic File Search', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--username', help='Local user for with Security Event Viewer rights', required=True)
     parser.add_argument('--password', help='Local user password')
     parser.add_argument('--sts_url', default='sts-east.us.code42.com', help='STS URL for retrieving authentication token, defaults to sts-east')
     parser.add_argument('--base_url', default='forensicsearch-east.us.code42.com', help='API URL for search, defaults to forensicsearch-east')
-    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'event_id', 'raw'], help='Type of attribute to search for. A raw search will take a JSON string as a value and use that as the query payload for complex queries', required=True)
+    parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'event_id', 'exposure', 'device_vendor', 'device_name', 'device_sn', 'process_owner', 'process_name', 'sync_destination', 'raw'], help='Type of attribute to search for.\nA \'raw\' search will take a JSON string as a value and use that as the query payload for complex queries.\nFor \'exposure\' searches, allowable values are \'removable_media\', \'application_read\', or \'cloud_storage\'.', required=True)
     parser.add_argument('--source', choices = ['google', 'onedrive', 'endpoint', 'all'], default='all', help='Source of file events, defaults to All')
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))
     parser.add_argument('--max_results', help='Max results to return, must be 10000 or less, default is 100', default=100, type=int)
@@ -308,7 +327,11 @@ def main():
             print('Error parsing JSON input, message: \'{}\'. Quitting...'.format(str(e)))
             sys.exit()
     else:
-        ffs_query.build_query_payload(args.search_type, query_values, args.source, args.max_results, args.events_before, args.events_after)
+        try:
+            ffs_query.build_query_payload(args.search_type, query_values, args.source, args.max_results, args.events_before, args.events_after)
+        except Exception as e:
+            print('Error parsing values, message: \'{}\'. Quitting...'.format(str(e)))
+            sys.exit()
     # Do the search
     results = ffs_query.do_search()
     if results is None:

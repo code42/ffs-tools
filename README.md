@@ -13,7 +13,7 @@ FFS Search Tool requires Python 3 and the following packages (install via pip):
 ```
 usage: ffs_search.py [-h] --username USERNAME [--password PASSWORD]
                      [--sts_url STS_URL] [--base_url BASE_URL] --search_type
-                     {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,raw}
+                     {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,exposure,device_vendor,device_name,device_sn,process_owner,process_name,sync_destination,raw}
                      [--source {google,onedrive,endpoint,all}]
                      [--values [value1 [value2 ...]]]
                      [--max_results MAX_RESULTS]
@@ -28,34 +28,27 @@ optional arguments:
   -h, --help            show this help message and exit
   --username USERNAME   Local user for with Security Event Viewer rights
   --password PASSWORD   Local user password
-  --sts_url STS_URL     STS URL for retrieving authentication token, defaults
-                        to sts-east
+  --sts_url STS_URL     STS URL for retrieving authentication token, defaults to sts-east
   --base_url BASE_URL   API URL for search, defaults to forensicsearch-east
-  --search_type {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,raw}
-                        Type of attribute to search for. A raw search will
-                        take a JSON string as a value and use that as the
-                        query payload for complex queries
+  --search_type {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,exposure,device_vendor,device_name,device_sn,process_owner,process_name,sync_destination,raw}
+                        Type of attribute to search for.
+                        A 'raw' search will take a JSON string as a value and use that as the query payload for complex queries.
+                        For 'exposure' searches, allowable values are 'removable_media', 'application_read', or 'cloud_storage'.
   --source {google,onedrive,endpoint,all}
                         Source of file events, defaults to All
   --values [value1 [value2 ...]]
-                        One or more values of attribute search_type to search
-                        for
+                        One or more values of attribute search_type to search for
   --max_results MAX_RESULTS
-                        Max results to return, must be 10000 or less, default
-                        is 100
+                        Max results to return, must be 10000 or less, default is 100
   --events_before EVENTS_BEFORE
-                        Retrieve events on or before specific date in YYYY-MM-
-                        DD format
+                        Retrieve events on or before specific date in YYYY-MM-DD format
   --events_after EVENTS_AFTER
-                        Retrieve events on or after specific date in YYYY-MM-
-                        DD format
+                        Retrieve events on or after specific date in YYYY-MM-DD format
   --count               Return count of results only
-  --in_file IN_FILE     Input file containing values (one per line) or raw
-                        JSON query payload
+  --in_file IN_FILE     Input file containing values (one per line) or raw JSON query payload
   --out_file OUT_FILE   Output file for results
   --out_filter {md5,sha256}
-                        Selected attribute to export instead of all attributes
-                        for each event
+                        Selected attribute to export instead of all attributes for each event
 ```
 
 ### CLI Examples
@@ -73,6 +66,11 @@ python3 ./ffs_search.py --username sampleuser@code42.com --search_type md5 --val
 #### Search for a SHA265 hash only on Google Drive
 ```
 python3 ./ffs_search.py --username sampleuser@code42.com --source google  --search_type sha256 --values 8e5dd3be8f6e975951824e1ec4984b028f38934d8f9bba3df557b1cef57e8118
+```
+
+#### Search for Removable Media events
+```
+python3 ./ffs_search.py --username sampleuser@code42.com --search_type exposure --values removable_media
 ```
 
 #### Conduct a custom search using a JSON payload
