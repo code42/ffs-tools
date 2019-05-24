@@ -25,21 +25,6 @@ class FFSQuery:
         self.base_url = base_url
     
 
-    def _get_login_config(self, sts_url, username):
-        """
-        Internal method to get the Code42 login configuration
-
-        :param sts_url: URL for STS API calls
-        :param username: Username for retrieving the login config
-        :returns: Returns the login type for that username
-        """
-        url = 'https://{}/api/v1/LoginConfiguration?username={}'.format(sts_url, username)
-        response = self.s.get(url)
-        if response.status_code != 200:
-            return "Failed"
-        login_settings = json.loads(response.text)
-        return login_settings['loginType']
-
     def _get_auth_token(self, sts_url, username, password):
         """
         Internal method to get the Code42 v3 auth tokent
@@ -49,11 +34,11 @@ class FFSQuery:
         :param password: Password for account
         :returns: Returns the v3 auth token if successful, or None if authenictaion has failed
         """
-        url = 'https://{}/api/v1/login-user?username={}'.format(sts_url, username)
+        url = 'https://{}/c42api/v3/auth/jwt?useBody=true'.format(sts_url)
         response = self.s.get(url, auth=(username,password))
         if response.status_code != 200:
             return None
-        return json.loads(response.text)['v3_user_token']
+        return json.loads(response.text)['data']['v3_user_token']
     
     def do_login(self, sts_url, username, password):
         """
@@ -63,10 +48,6 @@ class FFSQuery:
         :param password: Password for account
         :returns: Returns True if login was successful, False otherwise
         """
-        # Get the login config
-        login_config = self._get_login_config(sts_url,username)
-        if login_config != 'LOCAL':
-            return False
         # Get authentication token
         self.auth_token = self._get_auth_token(sts_url, username, password)
         if self.auth_token is None:
@@ -256,8 +237,8 @@ def main():
     parser = argparse.ArgumentParser(description='Code42 Forensic File Search', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--username', help='Local user for with Security Event Viewer rights', required=True)
     parser.add_argument('--password', help='Local user password')
-    parser.add_argument('--sts_url', default='sts-east.us.code42.com', help='STS URL for retrieving authentication token, defaults to sts-east')
-    parser.add_argument('--base_url', default='forensicsearch-east.us.code42.com', help='API URL for search, defaults to forensicsearch-east')
+    parser.add_argument('--sts_url', default='console.us.code42.com', help='STS URL for retrieving authentication token, defaults to console.us.code42.com')
+    parser.add_argument('--base_url', default='forensicsearch-east.us.code42.com', help='API URL for search, defaults to forensicsearch-east.us.code42.com')
     parser.add_argument('--search_type', choices = ['md5', 'sha256', 'filename', 'filepath', 'fileowner', 'hostname', 'actor', 'sharedwith', 'event_id', 'exposure', 'device_vendor', 'device_name', 'device_sn', 'process_owner', 'process_name', 'sync_destination', 'raw'], help='Type of attribute to search for.\nA \'raw\' search will take a JSON string as a value and use that as the query payload for complex queries.\nFor \'exposure\' searches, allowable values are \'removable_media\', \'application_read\', or \'cloud_storage\'.', required=True)
     parser.add_argument('--source', choices = ['google', 'onedrive', 'endpoint', 'all'], default='all', help='Source of file events, defaults to All')
     parser.add_argument('--values', nargs='*', help='One or more values of attribute search_type to search for', metavar=('value1', 'value2'))

@@ -28,8 +28,8 @@ optional arguments:
   -h, --help            show this help message and exit
   --username USERNAME   Local user for with Security Event Viewer rights
   --password PASSWORD   Local user password
-  --sts_url STS_URL     STS URL for retrieving authentication token, defaults to sts-east
-  --base_url BASE_URL   API URL for search, defaults to forensicsearch-east
+  --sts_url STS_URL     STS URL for retrieving authentication token, defaults to console.us.code42.com
+  --base_url BASE_URL   API URL for search, defaults to forensicsearch-east.us.code42.com
   --search_type {md5,sha256,filename,filepath,fileowner,hostname,actor,sharedwith,event_id,exposure,device_vendor,device_name,device_sn,process_owner,process_name,sync_destination,raw}
                         Type of attribute to search for.
                         A 'raw' search will take a JSON string as a value and use that as the query payload for complex queries.
